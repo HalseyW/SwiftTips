@@ -548,3 +548,12 @@ var array3 = [1, 2, 3, 3, 2, 1, 4]
 array3.unify()
 
 //
+public extension Sequence {
+    public func distinct<Key: Hashable>(by keyBlock: (Iterator.Element) -> Key) -> [Iterator.Element] {
+        var seen: [Key: Bool] = [:]
+        return self.filter {
+            seen.updateValue(true, forKey: keyBlock( $0 )) == nil
+        }
+    }
+}
+
