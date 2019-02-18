@@ -265,4 +265,286 @@ let equivalent = s[dynamicMember: "someDynamicMember"]
 print(dynamic == equivalent)
 
 //
+struct Point {
+    var x = 0.0, y = 0.0
+    
+    mutating func moveBy(x deltaX: Double, y deltaY: Double) {
+        x += deltaX
+        y += deltaY
+    }
+}
 
+var somePoint = Point(x: 1.0, y: 1.0)
+somePoint.moveBy(x: 2.0, y: 3.0)
+print("The point is now at (\(somePoint.x), \(somePoint.y))")
+
+//
+DispatchQueue.global(qos: .userInteractive).async {
+    print(Thread.isMainThread)
+}
+
+//
+let dispatchGroup = DispatchGroup()
+dispatchGroup.enter()
+dispatchGroup.leave()
+
+dispatchGroup.enter()
+dispatchGroup.leave()
+
+dispatchGroup.notify(queue: .main) {
+    print("notify")
+}
+
+//
+let sharedURLSession = URLSession.shared
+let standardUserDedaults = UserDefaults.standard
+
+class NetworkManager {
+    static let shared = NetworkManager(baseURL: URL.init(string: "xxxxxx")!)
+    
+    let baseURL: URL
+    
+    private init(baseURL: URL) {
+        self.baseURL = baseURL
+    }
+}
+
+NetworkManager.shared
+
+//
+protocol Jumping {
+    func jump()
+}
+
+class Cat: Jumping {
+    func jump() {
+        print("Pounces")
+    }
+}
+
+class Frog {
+    func leap() {
+        print("Leaps")
+    }
+}
+
+class FrogAdapter: Jumping {
+    let frog = Frog()
+    
+    func jump() {
+        frog.leap()
+    }
+}
+
+let cat = Cat()
+let frog = FrogAdapter()
+let animals: [Jumping] = [cat, frog]
+
+for animal in animals {
+    print(animal.jump())
+}
+
+//
+protocol Human {
+    var humanName: String { get set }
+    func run()
+    func eat()
+    func sleep()
+}
+
+class Soldier: Human {
+    var humanName: String
+    
+    init(soldierName: String) {
+        self.humanName = soldierName
+    }
+    
+    func run() {}
+    
+    func eat() {}
+    
+    func sleep() {}
+}
+
+class Civilian: Human {
+    var humanName: String
+    
+    init(civilianName: String) {
+        self.humanName = civilianName
+    }
+    
+    func run() {}
+    
+    func eat() {}
+    
+    func sleep() {}
+}
+
+enum HumanType {
+    case soldier
+    case civilian
+}
+
+class HumanFactory {
+    static let shared = HumanFactory()
+    
+    func getHuman(type: HumanType, name: String) -> Human {
+        switch type {
+        case .soldier:
+            return Soldier(soldierName: name)
+        case .civilian:
+            return Civilian(civilianName: name)
+        }
+    }
+}
+
+let soldier = HumanFactory.shared.getHuman(type: .soldier, name: "Jay")
+let civilian = HumanFactory.shared.getHuman(type: .civilian, name: "Saman")
+
+//
+protocol Fly {
+    func fly()
+}
+
+class Bird: Fly {
+    func fly() {
+        print("Spread Wings")
+    }
+}
+
+class Plane: Fly {
+    func fly() {
+        print("Start Engine")
+    }
+}
+
+let flyObj: Fly = Bird()
+print(flyObj.fly())
+
+//????? 58
+//protocol Observer {
+//    var id: Int { get }
+//    fun update<ObservableValue>(with newValue: ObservableValue)
+//}
+//
+//protocol Observable {
+//    associatedtype ObservableValue
+//    var value: ObservableValue { get set }
+//    var observers: [Observer] { get set }
+//
+//    func addObserver(observer: Observer)
+//    func removeObserver(observer: Observer)
+//    func notifyAllObservers<ObservableValue>(with newValue: ObservableValue)
+//}
+
+//
+extension CALayer {
+    func  applySketchShadow(color: UIColor = .black, alpha: Float = 0.5, x: CGFloat = 0, y: CGFloat = 2, blur: CGFloat = 4, spread: CGFloat = 0) {
+        shadowColor = color.cgColor
+        shadowOpacity = alpha
+        shadowOffset = CGSize(width: x, height: y)
+        if spread == 0 {
+            
+        } else {
+            let dx = -spread
+            let rect = bounds.insetBy(dx: dx, dy: dx)
+            shadowPath = UIBezierPath(rect: rect).cgPath
+        }
+    }
+}
+
+//
+struct Person {
+    var first: String
+    var last: String
+}
+
+extension Person {
+    init(dictionary: [String: String]) {
+        self.first = dictionary["first"] ?? "Emma"
+        self.last = dictionary["last"] ?? "Stone"
+    }
+}
+
+//
+protocol ClassNameProtocol {
+    static var className: String { get }
+    var className: String { get }
+}
+
+extension ClassNameProtocol {
+    static var className: String {
+        return String(describing: self)
+    }
+    
+    var className: String {
+        return type(of: self).className
+    }
+}
+
+extension NSObject: ClassNameProtocol { }
+
+UIView.className
+UILabel().className
+
+//
+public extension UITableView {
+    public func register<T: UITableViewCell>(cellType: T.Type, bundle: Bundle? = nil) {
+        let className = cellType.className
+        let nib = UINib(nibName: className, bundle: bundle)
+        register(nib, forCellReuseIdentifier: className)
+    }
+    
+    public func register<T: UITableViewCell>(cellTypes: [T.Type], bundle: Bundle? = nil) {
+        cellTypes.forEach {
+            register(cellType: $0, bundle: bundle)
+        }
+    }
+    
+    public func dequeueReuesableCell<T: UITableViewCell>(with type: T.Type, for indexPath: IndexPath) -> T {
+        return self.dequeueReusableCell(withIdentifier: type.className, for: indexPath) as! T
+    }
+}
+
+//?????75
+
+//
+public extension Array where Element: Equatable {
+    @discardableResult
+    public mutating func remove(element: Element) -> Index? {
+        guard let index = firstIndex(of: element) else { return nil }
+        remove(at: index)
+        return index
+    }
+    
+    @discardableResult
+    public mutating func remove(elements: [Element]) -> [Index] {
+        return elements.compactMap { remove(element: $0) }
+    }
+}
+
+var array2 = ["foo", "bar"]
+array2.remove(element: "foo")
+array2
+
+//
+public extension Array where Element: Hashable {
+    public mutating func unify() {
+        self = unified()
+    }
+}
+
+public extension Collection where Element: Hashable {
+    public func unified() -> [Element] {
+        return reduce(into: [] ) {
+            if !$0.contains($1) {
+                $0.append($1)
+            }
+        }
+    }
+}
+
+var array3 = [1, 2, 3, 3, 2, 1, 4]
+array3.unify()
+
+//
