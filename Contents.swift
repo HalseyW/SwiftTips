@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 //
 extension UIView {
@@ -508,7 +509,7 @@ public extension UITableView {
 
 //?????75
 
-//
+//?????
 public extension Array where Element: Equatable {
     @discardableResult
     public mutating func remove(element: Element) -> Index? {
@@ -527,7 +528,7 @@ var array2 = ["foo", "bar"]
 array2.remove(element: "foo")
 array2
 
-//
+//？？？？？
 public extension Array where Element: Hashable {
     public mutating func unify() {
         self = unified()
@@ -547,7 +548,7 @@ public extension Collection where Element: Hashable {
 var array3 = [1, 2, 3, 3, 2, 1, 4]
 array3.unify()
 
-//
+//？？？
 public extension Sequence {
     public func distinct<Key: Hashable>(by keyBlock: (Iterator.Element) -> Key) -> [Iterator.Element] {
         var seen: [Key: Bool] = [:]
@@ -557,3 +558,215 @@ public extension Sequence {
     }
 }
 
+struct Student {
+    let id: Int
+}
+
+let students: [Student] = [1, 2, 2, 3, 3, 3, 3].map { Student.init(id: $0) }
+print("\(students)")
+let uniqueStudents = students.distinct(by: { $0.id })
+print("\(uniqueStudents)")
+
+//
+extension UISearchBar {
+    func serchBarTextField() -> UITextField? {
+        for view in subviews {
+            for subview in view.subviews {
+                if let textField = subview as? UITextField {
+                    return textField
+                }
+            }
+        }
+        return nil
+    }
+}
+
+//
+extension Bundle {
+    var appName: String {
+        return infoDictionary?["CFBundlename"] as! String
+    }
+    
+    var bundleId: String {
+        return bundleIdentifier!
+    }
+    
+    var versionNumber: String {
+        return infoDictionary?["CFBundleShortVersionString"] as! String
+    }
+    
+    var buildNumber: String {
+        return infoDictionary?["CFBundleVersion"] as! String
+        
+    }
+}
+
+//
+public extension Collection {
+    func subscripe(safe index: Index) -> Element? {
+        return startIndex <= index && index <= endIndex ? self[index] : nil
+    }
+}
+
+let array4 = [0, 1, 2]
+if let item = array4.subscripe(safe: 2) {
+    print(item)
+}
+
+//????
+extension String {
+    var wordCount: Int {
+        let regex = try? NSRegularExpression(pattern: "\\w+")
+        return regex?.numberOfMatches(in: self, range: NSRange(location: 0, length: self.utf16.count)) ?? 0
+    }
+}
+
+let phrase = "The rain in Spain"
+print(phrase.wordCount)
+
+//?????
+extension Bundle {
+    func decode<T: Decodable>(_ type: T.Type, from fileName: String) -> T {
+        guard let json = url(forResource: fileName, withExtension: nil) else {
+            fatalError("Fail to locate \(fileName) in app bundle.")
+        }
+        guard let jsonData = try? Data(contentsOf: json) else {
+            fatalError("Fail to load \(fileName) from app bundle.")
+        }
+        let decoder = JSONDecoder()
+        
+        guard let result = try? decoder.decode(T.self, from: jsonData) else {
+            fatalError("Fail to load \(fileName) from app bundle.")
+        }
+        
+        return result
+    }
+}
+
+//
+extension String {
+    func withPrefix(_ prefix: String) -> String {
+        if self.hasPrefix(prefix) { return self }
+        return "\(prefix)\(self)"
+    }
+}
+let url = "www.google.com"
+let fullUrl = url.withPrefix("https://")
+
+//??????
+extension URL {
+    var queryParameters: [String: String]? {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
+        guard let queryItems = components.queryItems else { return nil }
+        
+        var items: [String: String] = [:]
+        
+        for queryItem in queryItems {
+            items[queryItem.name] = queryItem.value
+        }
+        
+        return items
+    }
+}
+
+//???
+extension UIView {
+    func fillSuperview() {
+        anchor(top: superview?.topAnchor, leading: superview?.leadingAnchor, bottom: superview?.bottomAnchor, trailing: superview?.trailingAnchor)
+    }
+    
+    func anchor(top: NSLayoutYAxisAnchor?, leading: NSLayoutXAxisAnchor?, bottom: NSLayoutYAxisAnchor?, trailing: NSLayoutXAxisAnchor?, padding: UIEdgeInsets = .zero, size: CGSize = .zero) {
+        translatesAutoresizingMaskIntoConstraints = false
+        
+        if let top = top {
+            topAnchor.constraint(equalTo: top, constant: padding.top).isActive = true
+        }
+        if let leading = leading {
+            leadingAnchor.constraint(equalTo: leading, constant: padding.left).isActive = true
+        }
+        if let bottom = bottom {
+            bottomAnchor.constraint(equalTo: bottom, constant: -padding.bottom).isActive = true
+        }
+        if let trailing = trailing {
+            trailingAnchor.constraint(equalTo: trailing, constant: -padding.right).isActive = true
+        }
+        
+        if size.width != 0 {
+            widthAnchor.constraint(equalToConstant: size.width).isActive = true
+        }
+        
+        if size.height != 0 {
+            heightAnchor.constraint(equalToConstant: size.height).isActive = true
+        }
+    }
+}
+
+//
+loopLabel: for i in 1...10 {
+    for j in 1...10 {
+        let product = i * j
+        print("Product is \(product)")
+        break loopLabel
+    }
+}
+
+//？？？？？
+extension Collection where Element: Numeric {
+    func  sum() -> Element {
+        return self.reduce(0, +)
+    }
+}
+
+[3, 4, 4].sum()
+[3.4, 6.2, 7.3].sum()
+
+//
+extension Bool {
+    var int : Int {
+        return self ? 1 : 0
+    }
+    var string: String {
+        return description
+    }
+}
+
+//
+extension CGPoint {
+    func distance(from point: CGPoint) -> CGFloat {
+        return CGPoint.distance(from: self, to: point)
+    }
+    
+    static func distance(from point1: CGPoint, to point2: CGPoint) -> CGFloat {
+        return sqrt(pow(point2.x - point1.x, 2) + pow(point2.y - point1.y, 2))
+    }
+}
+let pointA = CGPoint(x: 4, y: 5)
+let pointB = CGPoint(x: 8, y: 6)
+pointA.distance(from: pointB)
+CGPoint.distance(from: pointA, to: pointB)
+
+//
+extension Array {
+    mutating func prepend(_ newElement: Element) {
+        insert(newElement, at: 0)
+    }
+}
+
+var f = [2, 3 ,4, 5]
+f.prepend(1)
+
+//？？？？
+struct Vetctor2D {
+    var x = 0.0, y = 0.0
+}
+
+extension Vetctor2D {
+    static func + (left: Vetctor2D, right: Vetctor2D) -> Vetctor2D {
+        return Vetctor2D(x: left.x + right.x, y: left.y + right.y)
+    }
+    
+}
+
+let vector = Vetctor2D(x: 3.0, y: 1.0)
+let anotherVector = Vetctor2D(x: 2.0, y: 4.0)
+let combinedVector = vector + anotherVector
